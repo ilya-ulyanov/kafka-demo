@@ -2,10 +2,13 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
 public class ProducerApp {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProducerApp.class);
     private static final String KAFKA_SERVER = "localhost:9092";
     private static final String TOPIC_NAME = "coding-demo-01";
 
@@ -23,7 +26,18 @@ public class ProducerApp {
         var record = new ProducerRecord<String, String>(TOPIC_NAME, "hello world!");
 
         // 4. Send the record - async operation!
-        producer.send(record);
+        producer.send(record, (metadata, exception) -> {
+            if (exception == null) {
+                LOGGER.info("""
+                    Record was successfully sent, metadata:
+                     - Topic: {}
+                     - Partition: {}
+                     - Offset: {}
+                     - Timestamp: {}""", metadata.topic(), metadata.partition(), metadata.offset(), metadata.timestamp());
+            } else {
+                LOGGER.error("Error occurred while sending a record to Kafka", exception);
+            }
+        });
 
         // 5. Flush the KafkaProducer's buffer - sync operation
         producer.flush();
