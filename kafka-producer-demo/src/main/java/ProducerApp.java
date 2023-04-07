@@ -22,19 +22,16 @@ public class ProducerApp {
         // 2. Create KafkaProducer instance
         var producer = new KafkaProducer<String, String>(properties);
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             // 3. Create a Record
-            var record = new ProducerRecord<String, String>(TOPIC_NAME, "hello world %d!".formatted(i));
+            var key = "Key-%d".formatted(i);
+            var value = "Value-%d".formatted(i);
+            var record = new ProducerRecord<>(TOPIC_NAME, key, value);
 
             // 4. Send the record - async operation!
             producer.send(record, (metadata, exception) -> {
                 if (exception == null) {
-                    LOGGER.info("""
-                        Record was successfully sent, metadata:
-                         - Topic: {}
-                         - Partition: {}
-                         - Offset: {}
-                         - Timestamp: {}""", metadata.topic(), metadata.partition(), metadata.offset(), metadata.timestamp());
+                    LOGGER.info("Record was successfully sent, metadata: Key={}, Partition={}", key, metadata.partition());
                 } else {
                     LOGGER.error("Error occurred while sending a record to Kafka", exception);
                 }
