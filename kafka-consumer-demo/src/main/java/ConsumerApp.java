@@ -41,7 +41,6 @@ public class ConsumerApp {
     private void pollAndPrint() {
         try {
             while (true) {
-                LOGGER.info("Polling...");
                 var records = consumer.poll(Duration.ofSeconds(1));
                 if (!records.isEmpty()) {
                     for (var record : records) {
